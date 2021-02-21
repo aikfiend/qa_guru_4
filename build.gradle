@@ -56,3 +56,11 @@ task simpleTests(type: Test) {
         }
     }
 }
+
+task searchTests(type: Test) {
+    useJUnitPlatform {
+        filter {
+            includeTestsMatching "SearchTests"
+        }
+    }
+}
