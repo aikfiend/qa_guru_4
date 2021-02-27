@@ -10,6 +10,7 @@ allure {
     version = allureVersion
     autoconfigure = true
     aspectjweaver = true
+    configuration = "testImplementation"
     useJUnit5 {
         version = allureVersion
     }
@@ -29,7 +30,8 @@ dependencies {
 
     testRuntimeOnly([
             'org.junit.jupiter:junit-jupiter-engine:' + junitVersion,
-            'org.slf4j:slf4j-simple:1.7.30'
+            'org.slf4j:slf4j-api:1.7.30',
+            'ch.qos.logback:logback-classic:1.2.3'
     ])
 }
 
