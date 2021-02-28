@@ -42,6 +42,24 @@ pipeline {
                 }
             }
         }
+
+        stage("Checkout") {
+            steps {
+                checkout([$class                           : 'GitSCM',
+                          branches                         : [[name: 'refs/heads/${BRANCH_NAME}']],
+                          doGenerateSubmoduleConfigurations: false,
+                          extensions                       : [[$class: 'LocalBranch', localBranch: '${BRANCH_NAME}'],
+                                                              [$class: 'CheckoutOption', timeout: 5],
+                                                              [$class: 'CloneOption', depth: 0, noTags: true, reference: 'workspace/qaguru4_pipeline', shallow: true, timeout: 5]],
+                          submoduleCfg                     : [],
+                          userRemoteConfigs                : [[url: 'https://github.com/aikfiend/qaguru4.git']]])
+                script {
+                    GIT_COMMIT = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%H'").trim()
+                    GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%ae' | grep -o '.*@' | sed 's/@//'").trim()
+                }
+            }
+        }
+
         stage("SimpleTests") {
             steps {
                 script {
