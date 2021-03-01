@@ -1,3 +1,7 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java-library'
     id 'io.qameta.allure' version '2.8.1'
@@ -20,6 +24,14 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test']
+        }
+    }
+}
+
 dependencies {
     testImplementation([
             'com.codeborne:selenide:5.17.3',
@@ -39,19 +51,43 @@ test {
     useJUnitPlatform()
 }
 
+tasks.withType(Test) {
+//    environment 'DOCKER_CONFIG', dockerConfigDir
+
+    if (project.hasProperty("verbose.tests")) {
+        testLogging {
+            exceptionFormat "full"
+            def formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+            beforeTest { descriptor ->
+                logger.lifecycle(formatter.format(new Date()) + " : STARTED : " + descriptor.getClassName() + "." + descriptor.getName())
+            }
+            afterTest { descriptor, result ->
+                logger.lifecycle(formatter.format(new Date()) + " : " + result.getResultType() + " : " + descriptor.getClassName() + "." + descriptor.getName())
+            }
+        }
+    } else {
+        testLogging {
+            exceptionFormat "full"
+        }
+    }
+}
+
 task positiveTests(type: Test) {
+    testLogging.events.addAll([TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR])
     useJUnitPlatform {
         includeTags 'Positive'
     }
 }
 
 task negativeTests(type: Test) {
+    testLogging.events.addAll([TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR])
     useJUnitPlatform {
         includeTags 'Negative'
     }
 }
 
 task simpleTests(type: Test) {
+    testLogging.events.addAll([TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR])
     useJUnitPlatform {
         filter {
             includeTestsMatching "SimpleTests"
