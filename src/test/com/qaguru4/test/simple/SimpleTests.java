@@ -37,7 +37,7 @@ public class SimpleTests {
     @Test
     @Tag("Positive")
     @DisplayName("Positive Hamcrest Test with Steps")
-    void successHamcrestStepsTest() {
+    void positiveHamcrestStepsTest() {
         step("Assert that true is true", () ->
                 assertThat(true, is(true)));
     }
