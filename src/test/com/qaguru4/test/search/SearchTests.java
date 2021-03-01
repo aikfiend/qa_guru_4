@@ -1,3 +1,5 @@
+package com.qaguru4.test.search;
+
 import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.Condition.text;
