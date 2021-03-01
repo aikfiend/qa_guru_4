@@ -6,6 +6,10 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
         timeout (time: 5, unit: 'MINUTES')
     }
+    environment {
+        GIT_COMMIT = ""
+        GIT_COMMIT_AUTHOR = ""
+    }
     triggers {
         pollSCM('@hourly')
 //        The same, but cron-style:
@@ -60,22 +64,37 @@ pipeline {
             }
         }
 
-        stage("SimpleTests") {
+        stage("Positive Tests") {
             steps {
                 script {
-                    SIMPLE_TESTS_RESULT = 'FAILED'
+                    POSITIVE_TESTS_RESULT = 'FAILED'
                 }
                 timeout(time: 2, unit: 'MINUTES') {
-                    sh './gradlew --build-cache --console=plain simpleTests'
+                    sh './gradlew --build-cache --console=plain --info -Pverbose.tests clean positiveTests'
                     script {
-                        SIMPLE_TESTS_RESULT = 'SUCCESS'
+                        POSITIVE_TESTS_RESULT = 'SUCCESS'
                     }
                 }
             }
-            post {
-                always {
-                    junit 'build/test-results/**/*.xml'
+        }
+
+        stage("Negative Tests") {
+            steps {
+                script {
+                    NEGATIVE_TESTS_RESULT = 'FAILED'
                 }
+                timeout(time: 2, unit: 'MINUTES') {
+                    sh './gradlew --build-cache --console=plain --info -Pverbose.tests clean negativeTests'
+                    script {
+                        NEGATIVE_TESTS_RESULT = 'SUCCESS'
+                    }
+                }
+            }
+        }
+
+        post {
+            always {
+                junit 'build/test-results/**/*.xml'
             }
         }
     }
