@@ -18,6 +18,7 @@ allure {
     useJUnit5 {
         version = allureVersion
     }
+    reportDir = file('build/allure-results')
 }
 
 repositories {

@@ -91,6 +91,20 @@ pipeline {
                 }
             }
         }
+
+        stage('Publish Allure report') {
+            steps {
+                script {
+                    allure([
+                            includeProperties: false,
+                            jdk: '',
+                            properties: [],
+                            reportBuildPolicy: 'ALWAYS',
+                            results: [[path: 'build/allure-results']]
+                    ])
+                }
+            }
+        }
     }
     post {
         always {
