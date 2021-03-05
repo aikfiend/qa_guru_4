@@ -64,29 +64,15 @@ pipeline {
             }
         }
 
-        stage("Positive Tests") {
+        stage("Simple Tests") {
             steps {
                 script {
-                    POSITIVE_TESTS_RESULT = 'FAILED'
+                    SIMPLE_TESTS_RESULT = 'FAILED'
                 }
                 timeout(time: 2, unit: 'MINUTES') {
-                    sh './gradlew --console=plain --info -Pverbose.tests clean positiveTests'
+                    sh './gradlew --console=plain --info -Pverbose.tests clean simpleTests'
                     script {
-                        POSITIVE_TESTS_RESULT = 'SUCCESS'
-                    }
-                }
-            }
-        }
-
-        stage("Negative Tests") {
-            steps {
-                script {
-                    NEGATIVE_TESTS_RESULT = 'FAILED'
-                }
-                timeout(time: 2, unit: 'MINUTES') {
-                    sh './gradlew --console=plain --info -Pverbose.tests clean negativeTests'
-                    script {
-                        NEGATIVE_TESTS_RESULT = 'SUCCESS'
+                        SIMPLE_TESTS_RESULT = 'SUCCESS'
                     }
                 }
             }
