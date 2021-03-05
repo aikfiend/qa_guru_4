@@ -70,7 +70,7 @@ pipeline {
                     POSITIVE_TESTS_RESULT = 'FAILED'
                 }
                 timeout(time: 2, unit: 'MINUTES') {
-                    sh './gradlew --build-cache --console=plain --info -Pverbose.tests clean positiveTests'
+                    sh './gradlew --console=plain --info -Pverbose.tests clean positiveTests'
                     script {
                         POSITIVE_TESTS_RESULT = 'SUCCESS'
                     }
@@ -84,7 +84,7 @@ pipeline {
                     NEGATIVE_TESTS_RESULT = 'FAILED'
                 }
                 timeout(time: 2, unit: 'MINUTES') {
-                    sh './gradlew --build-cache --console=plain --info -Pverbose.tests clean negativeTests'
+                    sh './gradlew --console=plain --info -Pverbose.tests clean negativeTests'
                     script {
                         NEGATIVE_TESTS_RESULT = 'SUCCESS'
                     }
