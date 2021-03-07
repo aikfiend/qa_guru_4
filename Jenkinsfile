@@ -56,7 +56,8 @@ pipeline {
                                                               [$class: 'CheckoutOption', timeout: 5],
                                                               [$class: 'CloneOption', depth: 0, noTags: true, reference: 'workspace/qaguru4_pipeline', shallow: true, timeout: 5]],
                           submoduleCfg                     : [],
-                          userRemoteConfigs                : [[url: 'https://github.com/aikfiend/qaguru4.git']]])
+                          userRemoteConfigs                : [[url: 'https://github.com/aikfiend/qaguru4.git']]
+                ])
                 script {
                     GIT_COMMIT = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%H'").trim()
                     GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%ae' | grep -o '.*@' | sed 's/@//'").trim()
@@ -81,15 +82,12 @@ pipeline {
     post {
         always {
             junit 'build/test-results/**/*.xml'
-            script {
-                allure([
-                        includeProperties: false,
-                        jdk: '',
-                        properties: [],
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'build/allure-results']]
-                ])
-            }
+            allure([includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'build/allure-results']]
+            ])
         }
     }
 }

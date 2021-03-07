@@ -4,6 +4,7 @@ Useful resources:
 
 * [Jira](https://jira.autotests.cloud)
 * [Wiki](https://wiki.qa.guru)
+* [Slack](https://qaguruhq.slack.com)
 * [Jenkins](https://jenkins.autotests.cloud)
 * [Selenoid](https://selenoid.autotests.cloud)
 * [Allure TestOps](https://allure.autotests.cloud)
