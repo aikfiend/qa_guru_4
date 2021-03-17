@@ -2,6 +2,8 @@ package com.qaguru4.test.practice;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
+import com.qaguru4.test.utils.DateValidator;
+import com.qaguru4.test.utils.StringFormatter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +16,7 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class PracticeFormTests {
 
-    String URL = "https://demoqa.com/automation-practice-form",
+    static String URL = "https://demoqa.com/automation-practice-form",
             firstName = "John",
             lastName = "Snow",
             userEmail = "john@snow.wf",
@@ -38,8 +40,16 @@ public class PracticeFormTests {
         Configuration.startMaximized = true;
     }
 
+    @BeforeAll
+    public static void checkDate() {
+        DateValidator validator = new DateValidator("MMM dd, yyyy");
+        validator.isValid(monthOfBirth + " " + dayOfBirth + ", " + yearOfBirth);
+    }
+
+    String dateOfBirth = monthOfBirth.concat(" " + StringFormatter.numberToOrdinal(dayOfBirth)).concat(", " + yearOfBirth);
+
     @Test
-    void practiceFormTest() {
+    void practiceFormFillTest() {
         open(URL);
         $(".main-header").shouldHave(text("Practice Form"));
 
@@ -51,16 +61,12 @@ public class PracticeFormTests {
         $("#dateOfBirthInput").click();
         $(".react-datepicker__month-select").selectOption(monthOfBirth);
         $(".react-datepicker__year-select").selectOption(yearOfBirth);
+        $(".react-datepicker__day[aria-label*='" + dateOfBirth + "']").click();
 
 /*
-        This will fail in case when .react-datepicker__month contain two identical dayOfBirth
-        numbers (for current and for previous/next month):
-        $(".react-datepicker__month").$(byText(dayOfBirth)).click();
-        No way to do it better :(
+        Another way (native, without using utility class)
+        $$(".react-datepicker__day:not(.react-datepicker__day--outside-month)").findBy(text(dayOfBirth)).click();
 */
-
-        $(".react-datepicker__day--029:not(.react-datepicker__day--outside-month)").click();
-
         for (String hobbie : hobbies) {
             $(byText(hobbie)).parent().click();
         }
