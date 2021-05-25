@@ -1,18 +1,12 @@
 package com.qaguru4.test.practice;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.SelenideElement;
-import com.qaguru4.test.utils.DateValidator;
-import com.qaguru4.test.utils.StringFormatter;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.Objects;
-
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selectors.byText;
+import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.*;
+
+import com.codeborne.selenide.*;
+import com.qaguru4.test.utils.*;
+import org.junit.jupiter.api.*;
 
 public class PracticeFormTests {
 
@@ -22,10 +16,10 @@ public class PracticeFormTests {
             userEmail = "john@snow.wf",
             gender = "Other",
             mobileNumber = "9123456780",
-            dayOfBirth = "29",
+            dayOfBirth = "1",
             monthOfBirth = "November",
             yearOfBirth = "1922",
-            fileName = "cq5dam.web.1200.675.jpeg",
+            fileName = "JohnSnow.jpeg",
             currentAddress = "Winterfell Castle",
             state = "Haryana",
             city = "Panipat";
@@ -33,20 +27,19 @@ public class PracticeFormTests {
     String[] subjects = {"Accounting", "Computer Science", "Maths", "Physics"};
     String[] hobbies = {"Sports", "Reading", "Music"};
 
-    String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource(fileName)).getPath();
+    static String dateOfBirth = String.format("%s %s, %s", monthOfBirth, dayOfBirth, yearOfBirth);
 
     @BeforeAll
-    static void setup() {
-        Configuration.startMaximized = true;
+    public static void chkDate() throws TestUtils.InvalidDateException {
+        /*
+            Date validation required for throwing exceptions in following cases:
+            1) dayOfBirth = "0" (there would be flaky test in case of using with:
+                $$(".react-datepicker__day:not(.react-datepicker__day--outside-month)").findBy(text(dayOfBirth)).click();
+            2) dateOfBirth = "February 30, 1922"
+            3) dateOfBirth = "1 Jan 1922"
+        */
+        TestUtils.isValidDate(dateOfBirth);
     }
-
-    @BeforeAll
-    public static void checkDate() {
-        DateValidator validator = new DateValidator("MMM dd, yyyy");
-        validator.isValid(monthOfBirth + " " + dayOfBirth + ", " + yearOfBirth);
-    }
-
-    String dateOfBirth = monthOfBirth.concat(" " + StringFormatter.numberToOrdinal(dayOfBirth)).concat(", " + yearOfBirth);
 
     @Test
     void practiceFormFillTest() {
@@ -56,36 +49,37 @@ public class PracticeFormTests {
         $("#firstName").setValue(firstName);
         $("#lastName").setValue(lastName);
         $("#userEmail").setValue(userEmail);
-        $(byText(gender)).parent().click();
+        $(byText(gender)).click();
         $("#userNumber").setValue(mobileNumber);
         $("#dateOfBirthInput").click();
         $(".react-datepicker__month-select").selectOption(monthOfBirth);
         $(".react-datepicker__year-select").selectOption(yearOfBirth);
-        $(".react-datepicker__day[aria-label*='" + dateOfBirth + "']").click();
+        $(".react-datepicker__day[aria-label*='" + TestUtils.ordinalDayDateFormat(dateOfBirth) + "']").click();
 
-/*
-        Another way (native, without using utility class)
-        $$(".react-datepicker__day:not(.react-datepicker__day--outside-month)").findBy(text(dayOfBirth)).click();
-*/
-        for (String hobbie : hobbies) {
-            $(byText(hobbie)).parent().click();
-        }
+        /*
+            Will do the same, but without TestUtils.ordinalDayDateFormat():
+            $$(".react-datepicker__day:not(.react-datepicker__day--outside-month)").findBy(text(dayOfBirth)).click();
+        */
 
         SelenideElement subjectsInput = $("#subjectsInput");
         for (String subject : subjects) {
             subjectsInput.setValue(subject).pressTab();
         }
 
-        $("#uploadPicture").uploadFile(new File(filePath));
+        for (String hobbie : hobbies) {
+            $(byText(hobbie)).click();
+        }
+
+        $("#uploadPicture").uploadFromClasspath(fileName);
         $("#currentAddress").setValue(currentAddress);
         $("#state input").setValue(state).pressTab();
         $("#city input").setValue(city).pressTab();
 
-/*
-        Will do the same as two last above but using cssSelector is preferable than using xpathExpression
-        $x("//div[@id='state']//input").setValue(state).pressTab();
-        $x("//div[@id='city']//input").setValue(city).pressTab();
-*/
+        /*
+            Will do the same as two last above but using cssSelector is preferable than using xpathExpression
+            $x("//div[@id='state']//input").setValue(state).pressTab();
+            $x("//div[@id='city']//input").setValue(city).pressTab();
+        */
 
         $("#submit").click();
 
@@ -93,7 +87,7 @@ public class PracticeFormTests {
         $(".modal-body thead tr").shouldHave(text("Label")).shouldHave(text("Values"));
         $(".modal-body tbody tr", 0)
                 .shouldHave(text("Student Name"))
-                .shouldHave(text(firstName + " " + lastName));
+                .shouldHave(text(String.format("%s %s", firstName, lastName)));
         $(".modal-body tbody tr", 1)
                 .shouldHave(text("Student Email"))
                 .shouldHave(text(userEmail));
@@ -105,20 +99,21 @@ public class PracticeFormTests {
                 .shouldHave(text(mobileNumber));
         $(".modal-body tbody tr", 4)
                 .shouldHave(text("Date of Birth"))
-                .shouldHave(text(dayOfBirth + " " + monthOfBirth + "," + yearOfBirth));
+                .shouldHave(text(String.format("%s %s,%s", dayOfBirth, monthOfBirth, yearOfBirth)));
         $(".modal-body tbody tr", 5)
                 .shouldHave(text("Subjects"))
                 .shouldHave(text(String.join(", ", subjects)));
         $(".modal-body tbody tr", 6)
                 .shouldHave(text("Hobbies"))
                 .shouldHave(text(String.join(", ", hobbies)));
-        $(".modal-body tbody tr", 7).shouldHave(text("Picture"))
+        $(".modal-body tbody tr", 7)
+                .shouldHave(text("Picture"))
                 .shouldHave(text(fileName));
         $(".modal-body tbody tr", 8)
                 .shouldHave(text("Address"))
                 .shouldHave(text(currentAddress));
         $(".modal-body tbody tr",9)
                 .shouldHave(text("State and City"))
-                .shouldHave(text(state + " " + city));
+                .shouldHave(text(String.format("%s %s", state, city)));
     }
 }
